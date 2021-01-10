@@ -1,21 +1,57 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Text, Image } from 'react-native'
+import { Card, ListItem, Button, Icon } from 'react-native-elements'
+
+
+
+
+const users = [
+  {
+    name: 'brynn',
+    avatar: 'https://s3.amazonaws.com/uifaces/faces/twitter/brynn/128.jpg'
+  }
+  // more users here
+]
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>exour app!</Text>
-      <StatusBar style="auto" />
+    <View>
+      <Card>
+        <Card.Title>CARD WITH DIVIDER</Card.Title>
+        <Card.Divider/>
+        {
+          users.map((u, i) => {
+            return (
+              <View key={i}>
+                <Image
+                  
+                  resizeMode="cover"
+                  source={{ uri: u.avatar }}
+                />
+                <Text >{u.name}</Text>
+              </View>
+            );
+          })
+        }
+      </Card>
+      <Card>
+        <Card.Title>CARD WITH DIVIDER</Card.Title>
+        <Card.Divider/>
+        {
+          users.map((u, i) => {
+            return (
+              <View key={i}>
+                <Image
+                  
+                  resizeMode="cover"
+                  source={{ uri: u.avatar }}
+                />
+                <Text >{u.name}</Text>
+              </View>
+            );
+          })
+        }
+      </Card>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
