@@ -2,16 +2,23 @@ import { StyleProvider } from 'native-base';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native'
 import { ListItem, Icon, Badge, Button, Overlay, Input } from 'react-native-elements'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-const Categories = () => {
+const Categories = (props) => {
 
     const [categoris, setCategoris] = useState([]);
 
     const [visible, setVisible] = useState(false);
     const [categoryName, setCategoryName] = useState('');
+    const [chosenCategoryName, setChosenCategoryName] = useState('');
 
+
+    useEffect(() => {
+
+        goToNotesPage();
+    }, [chosenCategoryName])
 
 
 
@@ -39,6 +46,34 @@ const Categories = () => {
     const toggleOverlay = () => {
         setVisible(!visible);
     };
+    const goToNotesPage = () => {
+
+
+        storeData(categoris);
+
+        props.navigation.navigate('Nav', {
+            userName: chosenCategoryName
+        })
+    };
+
+
+    // const storeData = async (value) => {
+    //     try {
+    //       await AsyncStorage.setItem('@storage_Key', value)
+    //     } catch (e) {
+    //       // saving error
+    //     }
+    //   }
+
+
+    const storeData = async (value) => {
+        try {
+            const jsonValue = JSON.stringify(value)
+            await AsyncStorage.setItem('Categories', jsonValue)
+        } catch (e) {
+            // saving error
+        }
+    }
 
 
 
@@ -48,11 +83,28 @@ const Categories = () => {
             <View style={{ marginVertical: 30, alignItems: 'center' }} >
                 <Text style={styles.header}>My Notes</Text>
             </View>
+            <View style={styles.buttonContainer}>
+
+                <Button
+                    onPress={() => addCategory()}
+                    title="Add Note Category"
+                    type="outline"
+                />
+
+            </View>
 
             <View style={styles.container} >
                 {
                     categoris.map((item, i) => (
-                        <ListItem style={styles.listItem} key={i} bottomDivider>
+                        <ListItem style={styles.listItem} key={i} bottomDivider onPress={() => {
+                            setChosenCategoryName(item.categoryName);
+                            goToNotesPage()
+
+
+
+
+                        }}>
+
 
                             <ListItem.Content>
                                 <Badge value={item.notes.length} status="primary" />
@@ -64,14 +116,7 @@ const Categories = () => {
                 }
 
             </View>
-            <View style={styles.buttonContainer}>
 
-                <Button
-                    onPress={() => addCategory()}
-                    title="Add Note Category"
-                    type="outline"
-                />
-            </View>
             <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
                 <View>
                     <Text>Please add category name</Text>
@@ -116,7 +161,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         //alignItems: 'flex-end',
-        marginTop: 200,
+        //marginTop: 200,
         width: 400,
 
     },
