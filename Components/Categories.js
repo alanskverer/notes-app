@@ -1,5 +1,5 @@
 import { StyleProvider } from 'native-base';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native'
 import { ListItem, Icon, Badge, Button, Overlay, Input } from 'react-native-elements'
 
@@ -7,10 +7,13 @@ import { ListItem, Icon, Badge, Button, Overlay, Input } from 'react-native-elem
 
 const Categories = () => {
 
-    const [categoris, setCategoris] = useState([])
+    const [categoris, setCategoris] = useState([]);
 
     const [visible, setVisible] = useState(false);
     const [categoryName, setCategoryName] = useState('');
+
+
+
 
     const addCategory = () => {
         toggleOverlay();
@@ -19,7 +22,10 @@ const Categories = () => {
     const addCategoryHandler = () => {
         let newCategory = {
             categoryName: categoryName,
-            notes: []
+            notes: [
+
+
+            ]
         }
         let categoryArr = [...categoris, newCategory];
         setCategoris(categoryArr);
