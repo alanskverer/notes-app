@@ -112,11 +112,11 @@ const Notes = () => {
             </View>
             <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
                 <View>
-                    <Text>Please add note with text:</Text>
+                    <Text>Please add a note with text:</Text>
                     <TextInput
                         style={styles.textInput}
                         onChangeText={(text) => setNoteText(text)}
-                        placeholder='Note Name'
+                        placeholder='Note text'
                         multiline={true}
                         textAlignVertical="top"
                     />
@@ -127,7 +127,7 @@ const Notes = () => {
                             onPress={() => null} />
                     <Button
                         onPress={() => addNoteHandler()}
-                        title="Add"
+                        title="Add Note"
                         type="outline"
                     />
 
