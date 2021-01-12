@@ -1,8 +1,9 @@
-import { StyleProvider } from 'native-base';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { ListItem, Icon, Badge, Button, Overlay, Input } from 'react-native-elements'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 
 
@@ -15,12 +16,61 @@ const Categories = (props) => {
     const [chosenCategoryName, setChosenCategoryName] = useState('');
 
 
+
+
+    useFocusEffect(
+        React.useCallback(() => {
+            let isActive = true;
+
+
+            const getData = async () => {
+
+                try {
+                    // console.log("getting the")
+                    const jsonValue = await AsyncStorage.getItem('Categories')
+                    jsonValue != null ? JSON.parse(jsonValue) : null;
+                    //   console.log(JSON.parse(jsonValue));
+                    const obj = JSON.parse(jsonValue);
+                    setCategoris(obj);
+
+                } catch (e) {
+                }
+            }
+
+            getData();
+
+            return () => {
+                isActive = false;
+            };
+        }, [])
+    );
+
+
+
+
+
+
     useEffect(() => {
 
+
+        getData();
         goToNotesPage();
     }, [chosenCategoryName])
 
 
+
+    const getData = async () => {
+
+        try {
+            const jsonValue = await AsyncStorage.getItem('Categories')
+            jsonValue != null ? JSON.parse(jsonValue) : null;
+            //  console.log(JSON.parse(jsonValue));
+            const obj = JSON.parse(jsonValue);
+            setCategoris(obj);
+
+        } catch (e) {
+        }
+    }
 
     const addCategory = () => {
         toggleOverlay();
@@ -51,19 +101,13 @@ const Categories = (props) => {
 
         storeData(categoris);
 
-        props.navigation.navigate('Nav', {
-            userName: chosenCategoryName
+        props.navigation.navigate('Notes', {
+            categoryName: chosenCategoryName
         })
     };
 
 
-    // const storeData = async (value) => {
-    //     try {
-    //       await AsyncStorage.setItem('@storage_Key', value)
-    //     } catch (e) {
-    //       // saving error
-    //     }
-    //   }
+
 
 
     const storeData = async (value) => {
@@ -71,7 +115,6 @@ const Categories = (props) => {
             const jsonValue = JSON.stringify(value)
             await AsyncStorage.setItem('Categories', jsonValue)
         } catch (e) {
-            // saving error
         }
     }
 
@@ -91,17 +134,15 @@ const Categories = (props) => {
                     type="outline"
                 />
 
+
             </View>
 
             <View style={styles.container} >
                 {
                     categoris.map((item, i) => (
-                        <ListItem style={styles.listItem} key={i} bottomDivider onPress={() => {
+                        <ListItem style={styles.listItem, { backgroundColor: 'white' }} key={i} bottomDivider onPress={() => {
                             setChosenCategoryName(item.categoryName);
                             goToNotesPage()
-
-
-
 
                         }}>
 
@@ -147,6 +188,7 @@ const styles = StyleSheet.create({
     },
     container: {
         marginVertical: 20,
+        backgroundColor: 'white'
 
     },
     header: {
@@ -155,13 +197,12 @@ const styles = StyleSheet.create({
     },
     listItem: {
         padding: 10,
-        marginStart: 10
+        marginStart: 10,
+        backgroundColor: 'white'
     },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        //alignItems: 'flex-end',
-        //marginTop: 200,
         width: 400,
 
     },

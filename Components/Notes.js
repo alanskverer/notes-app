@@ -1,13 +1,45 @@
-import { StyleProvider } from 'native-base';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, Alert, TextInput } from 'react-native'
 import { ListItem, Icon, Badge, Button, Overlay, Input, Card } from 'react-native-elements'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-const Notes = () => {
+const Notes = (props) => {
 
-    const [notesArray, setNotes] = useState([])
+    const [data, setData] = useState([])
+
+    useEffect(() => {
+        if (data.length == 0) {
+            getData();
+        }
+        else {
+            setDataNotes();
+        }
+
+
+    }, [data])
+
+
+
+    const getData = async () => {
+        try {
+            const jsonValue = await AsyncStorage.getItem('Categories')
+            jsonValue != null ? JSON.parse(jsonValue) : null;
+            const obj = JSON.parse(jsonValue);
+            setData(obj);
+
+        } catch (e) {
+        }
+    }
+    let { categoryName } = props.route.params
+
+
+
+
+
+    const [notesArray, setNotesArray] = useState([])
+
 
     const [visible, setVisible] = useState(false);
     const [noteDate, setNoteDate] = useState('');
@@ -15,26 +47,56 @@ const Notes = () => {
     const [noteImage, setNoteImage] = useState('');
 
     const addNote = () => {
+
         toggleOverlay();
     }
 
+    const setDataNotes = () => {
+
+        data.forEach((item) => {
+            if (item.categoryName === categoryName) {
+                setNotesArray([...item.notes])
+            }
+        })
+    }
+
     const addNoteHandler = () => {
-        /*let newNote = {
-            noteDate: noteDate,
-            noteText: noteText,
-            noteImage: noteImage
-        }*/
+
         let newNote = {
             NoteDate: getCurrentDate(),
             NoteText: noteText,
             NoteImage: "https://i.pinimg.com/originals/2c/d5/2c/2cd52c2fffecc9b3b183bdd3d7799844.png"
         }
         let notesArr = [...notesArray, newNote];
-        setNotes(notesArr);
+
+
+        data.forEach((item) => {
+            if (item.categoryName === categoryName) {
+                item.notes = notesArr
+
+            }
+        })
+        storeData(data)
+
+
+        setNotesArray(notesArr);
+
+
+
 
         toggleOverlay();
 
     }
+
+
+    const storeData = async (value) => {
+        try {
+            const jsonValue = JSON.stringify(value)
+            await AsyncStorage.setItem('Categories', jsonValue)
+        } catch (e) {
+        }
+    }
+
 
     const toggleOverlay = () => {
         setVisible(!visible);
@@ -45,36 +107,57 @@ const Notes = () => {
             "Are you sure you want to delete?",
             "This action can't be undone!",
             [
-              {
-                text: "Cancel",
-                style: "cancel"
-              },
-              { text: "OK", onPress: () => removeNote(index) }
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                { text: "OK", onPress: () => removeNote(index) }
             ],
             { cancelable: false }
-          );
+        );
     }
 
     const removeNote = (index) => {
         var notesArr = [...notesArray];
         if (index >= 0) {
             notesArr.splice(index, 1);
-            setNotes(notesArr);
+            setNotesArray(notesArr);
+
+
+
+            data.forEach((item) => {
+                if (item.categoryName === categoryName) {
+                    item.notes = notesArr
+
+
+                }
+            })
+            storeData(data)
+
+
+
         }
         else {
-            Alert.alert("An error has occured: "+index);
+            Alert.alert("An error has occured: " + index);
         }
     };
+
+
+
+
 
 
 
     return (
         <ScrollView>
             <View style={{ marginVertical: 30, alignItems: 'center' }} >
-                <Text style={styles.header}>Category Name Here</Text>
+                <Text style={styles.header}> {categoryName}</Text>
             </View>
 
             <View style={styles.buttonContainer}>
+
+
+
 
                 <Button
                     onPress={() => addNote()}
@@ -86,25 +169,25 @@ const Notes = () => {
             <View style={styles.container} >
                 {
                     notesArray.map((item, i) => (
-                        
+
 
                         <Card key={i}>
-                        <Card.Title>NOTE FROM {item.NoteDate}</Card.Title>
-                        <Card.Divider/>
-                        
-                            <Text style={{marginBottom: 10}}>
-                            {item.NoteText}
+                            <Card.Title>NOTE FROM {item.NoteDate}</Card.Title>
+                            <Card.Divider />
+
+                            <Text style={{ marginBottom: 10 }}>
+                                {item.NoteText}
                             </Text>
-                            <Image 
-                                source={{uri:item.NoteImage}} 
-                                style={{width: 200, height: 200}} />
+                            <Image
+                                source={{ uri: item.NoteImage }}
+                                style={{ width: 200, height: 200 }} />
                             <Button
-                            icon={<Icon name='delete' color='#ffffff' />}
-                            buttonStyle={{borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0}}
-                            title='Delete'
-                            onPress={() => showDeleteAlert(i)} />
-                            
-                        
+                                icon={<Icon name='delete' color='#ffffff' />}
+                                buttonStyle={{ borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0 }}
+                                title='Delete'
+                                onPress={() => showDeleteAlert(i)} />
+
+
                         </Card>
                     ))
                 }
@@ -121,10 +204,10 @@ const Notes = () => {
                         textAlignVertical="top"
                     />
                     <Button
-                            icon={<Icon name='camera' color='#ffffff' />}
-                            buttonStyle={{borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 30, marginTop: 10}}
-                            title='Select Image'
-                            onPress={() => null} />
+                        icon={<Icon name='camera' color='#ffffff' />}
+                        buttonStyle={{ borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 30, marginTop: 10 }}
+                        title='Select Image'
+                        onPress={() => null} />
                     <Button
                         onPress={() => addNoteHandler()}
                         title="Add Note"
@@ -137,12 +220,12 @@ const Notes = () => {
 
         </ScrollView>
 
-        
+
     )
 
 }
 
-const getCurrentDate=()=>{
+const getCurrentDate = () => {
 
     var date = new Date().getDate();
     var month = new Date().getMonth() + 1;
@@ -187,8 +270,8 @@ const styles = StyleSheet.create({
     },
     textInput: {
         margin: 12,
-        width:320,
-        borderBottomWidth:1,
+        width: 320,
+        borderBottomWidth: 1,
     },
 
 })
