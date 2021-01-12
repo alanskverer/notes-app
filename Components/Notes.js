@@ -1,13 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, Alert, TextInput } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, Alert, TextInput, TouchableOpacity } from 'react-native'
 import { ListItem, Icon, Badge, Button, Overlay, Input, Card } from 'react-native-elements'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera } from 'expo-camera';
 
 
 
 const Notes = (props) => {
 
     const [data, setData] = useState([])
+
+
+
+
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Camera.requestPermissionsAsync();
+            setHasPermission(status === 'granted');
+        })();
+    }, [cameraOn]);
+
+
+
+    _takePhoto = async () => {
+        const photo = await ref.current.takePictureAsync();
+        setSelectedImage({ localUri: photo.uri });
+        setImageHasSelected(true)
+        setCameraOn(false);
+        console.debug(photo)
+    }
+
+    if (hasPermission === null) {
+        return <View />;
+    }
+    if (hasPermission === false) {
+        return <Text>No access to camera</Text>;
+    }
+
+
+
+
+
+
 
     useEffect(() => {
         if (data.length == 0) {
@@ -18,7 +54,7 @@ const Notes = (props) => {
         }
 
 
-    }, [data])
+    }, [data, imageHasSelected])
 
 
 
@@ -37,14 +73,19 @@ const Notes = (props) => {
 
 
 
+    const [hasPermission, setHasPermission] = useState(null);
+    const [type, setType] = useState(Camera.Constants.Type.back);
+    const ref = useRef(null)
+
 
     const [notesArray, setNotesArray] = useState([])
 
 
     const [visible, setVisible] = useState(false);
-    const [noteDate, setNoteDate] = useState('');
     const [noteText, setNoteText] = useState('');
-    const [noteImage, setNoteImage] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageHasSelected, setImageHasSelected] = useState(false);
+    const [cameraOn, setCameraOn] = useState(false);
 
     const addNote = () => {
 
@@ -61,11 +102,13 @@ const Notes = (props) => {
     }
 
     const addNoteHandler = () => {
-
+        let imageToAdd = selectedImage == null ? 'https://i.pinimg.com/originals/bf/c2/67/bfc267127a451c7ad3f64b79db279af2.jpg'
+            : selectedImage.localUri;
         let newNote = {
             NoteDate: getCurrentDate(),
             NoteText: noteText,
-            NoteImage: "https://i.pinimg.com/originals/2c/d5/2c/2cd52c2fffecc9b3b183bdd3d7799844.png"
+            //NoteImage: selectedImage.localUri
+            NoteImage: imageToAdd
         }
         let notesArr = [...notesArray, newNote];
 
@@ -77,15 +120,11 @@ const Notes = (props) => {
             }
         })
         storeData(data)
-
-
         setNotesArray(notesArr);
-
-
-
-
+        setSelectedImage(null);
+        setImageHasSelected(false)
+        setNoteText('');
         toggleOverlay();
-
     }
 
 
@@ -142,14 +181,128 @@ const Notes = (props) => {
         }
     };
 
+    let openImagePickerAsync = async () => {
+        //let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+        let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (permissionResult.granted === false) {
+            alert("Permission to access camera roll is required!");
+            return;
+        }
+
+        let pickerResult = await ImagePicker.launchImageLibraryAsync();
+        console.log(pickerResult);
+
+        if (pickerResult.cancelled === true) {
+            return;
+        }
+
+        setSelectedImage({ localUri: pickerResult.uri });
+        setImageHasSelected(true);
+    };
+
+    const openCameraAsync = async () => {
+        const { status } = await Camera.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+
+    }
 
 
 
 
+
+    let selectImageContent = imageHasSelected == false ?
+        <View>
+            <View>
+                <Button
+
+                    icon={<Icon name='photo' color='#ffffff' />}
+                    buttonStyle={{ borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 30, marginTop: 10 }}
+                    title='Select Image From Gallery'
+                    onPress={() => {
+
+                        openImagePickerAsync()
+                        // props.navigation.navigate('PickImage')
+
+
+
+                    }} />
+
+            </View>
+
+            <View>
+                <Button
+
+                    icon={<Icon name='camera' color='#ffffff' />}
+                    buttonStyle={{ borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 30, marginTop: 10 }}
+                    title='Take A Picture'
+                    onPress={() => {
+                        setCameraOn(true)
+                        _takePhoto()
+
+
+
+
+
+                    }} />
+
+
+            </View>
+
+
+        </View>
+
+        : <Image
+            source={{ uri: selectedImage.localUri }}
+            style={{ width: 80, height: 80, marginVertical: 20 }} />
+
+
+
+    let cam = cameraOn == false ? null :
+        <View style={{ flex: 1 }}>
+            <Camera style={{ flex: 1 }} type={type} ref={ref}>
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'transparent',
+                        flexDirection: 'row'
+                    }}>
+
+
+                    <TouchableOpacity
+                        style={{
+                            flex: 0.5,
+                            alignSelf: 'flex-end',
+                            alignItems: 'center',
+                        }}
+                        onPress={() => {
+                            setType(
+                                type === Camera.Constants.Type.back
+                                    ? Camera.Constants.Type.front
+                                    : Camera.Constants.Type.back
+                            );
+                        }}>
+                        <Text style={{ fontSize: 13, marginBottom: 10, color: 'white' }}> Flip </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={_takePhoto}
+                    >
+
+                        <Text style={{ fontSize: 24 }}>Snap Photo</Text>
+                    </TouchableOpacity>
+                </View>
+            </Camera>
+        </View>
 
 
     return (
+
         <ScrollView>
+
+
+
+
+
             <View style={{ marginVertical: 30, alignItems: 'center' }} >
                 <Text style={styles.header}> {categoryName}</Text>
             </View>
@@ -203,11 +356,10 @@ const Notes = (props) => {
                         multiline={true}
                         textAlignVertical="top"
                     />
-                    <Button
-                        icon={<Icon name='camera' color='#ffffff' />}
-                        buttonStyle={{ borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 30, marginTop: 10 }}
-                        title='Select Image'
-                        onPress={() => null} />
+                    {selectImageContent}
+                    {cam}
+
+
                     <Button
                         onPress={() => addNoteHandler()}
                         title="Add Note"
