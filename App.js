@@ -2,12 +2,10 @@ import React from 'react';
 import { View, Text, Image } from 'react-native'
 import { Card, ListItem, Button, Icon } from 'react-native-elements'
 import Categories from './Components/Categories';
-import MyCard from './Components/MyCard';
-import Nav from './Components/Nav';
-
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import Notes from './Components/Notes';
 
 
 
@@ -19,11 +17,8 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Categories">
         <Stack.Screen name="Categories" component={Categories} />
-        <Stack.Screen name="Nav" component={Nav} />
-
-
+        <Stack.Screen name="Notes" component={Notes} />
       </Stack.Navigator>
-
     </NavigationContainer>
 
 
