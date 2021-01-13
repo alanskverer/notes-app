@@ -10,6 +10,7 @@ import PickImage from './Components/PickImage';
 
 const Stack = createStackNavigator();
 
+
 export default function App() {
   return (
     <NavigationContainer>

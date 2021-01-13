@@ -13,9 +13,9 @@ const Categories = (props) => {
 
   const [visible, setVisible] = useState(false);
   const [categoryName, setCategoryName] = useState('');
-  const [chosenCategoryName, setChosenCategoryName] = useState('');
+  //const [chosenCategoryName, setChosenCategoryName] = useState('');
 
-
+  //AsyncStorage.clear() //For debugging purposes only. Resets app data
 
 
   useFocusEffect(
@@ -54,8 +54,8 @@ const Categories = (props) => {
 
 
     getData();
-    goToNotesPage();
-  }, [chosenCategoryName])
+    //goToNotesPage();
+  }, [])
 
 
 
@@ -84,7 +84,9 @@ const Categories = (props) => {
 
       ]
     }
-    let categoryArr = [...categoris, newCategory];
+    var categoryArr = [];
+    if (categoris)
+      categoryArr = [...categoris, newCategory];
     setCategoris(categoryArr);
 
     toggleOverlay();
@@ -96,24 +98,21 @@ const Categories = (props) => {
   const toggleOverlay = () => {
     setVisible(!visible);
   };
-  const goToNotesPage = () => {
-
-
-    storeData(categoris);
-
-    props.navigation.navigate('Notes', {
-      categoryName: chosenCategoryName
-    })
+  const goToNotesPage = (categoryName) => {
+    storeData(categoris, categoryName);
   };
 
 
 
 
 
-  const storeData = async (value) => {
+  const storeData = async (value, categoryName) => {
     try {
       const jsonValue = JSON.stringify(value)
       await AsyncStorage.setItem('Categories', jsonValue)
+      props.navigation.navigate('Notes', {
+        categoryName: categoryName
+      })
     } catch (e) {
     }
   }
@@ -139,10 +138,9 @@ const Categories = (props) => {
 
       <View style={styles.container} >
         {
-          categoris.map((item, i) => (
+          categoris && categoris.map((item, i) => (
             <ListItem style={styles.listItem, { backgroundColor: 'white' }} key={i} bottomDivider onPress={() => {
-              setChosenCategoryName(item.categoryName);
-              goToNotesPage()
+              goToNotesPage(item.categoryName)
 
             }}>
 

@@ -26,10 +26,15 @@ const Notes = (props) => {
 
     _takePhoto = async () => {
         const photo = await ref.current.takePictureAsync();
-        setSelectedImage({ localUri: photo.uri });
-        setImageHasSelected(true)
-        setCameraOn(false);
-        console.debug(photo)
+        try {
+            setSelectedImage({ localUri: photo.uri });
+            setImageHasSelected(true)
+            setCameraOn(false);
+            console.debug(photo)
+        } catch (error) {
+            
+        }
+        
     }
 
     if (hasPermission === null) {
