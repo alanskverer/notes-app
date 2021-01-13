@@ -17,7 +17,6 @@ export default function App() {
       <Stack.Navigator initialRouteName="Categories">
         <Stack.Screen name="Categories" component={Categories} />
         <Stack.Screen name="Notes" component={Notes} />
-        <Stack.Screen name="PickImage" component={PickImage} />
       </Stack.Navigator>
     </NavigationContainer>
 

@@ -32,9 +32,9 @@ const Notes = (props) => {
             setCameraOn(false);
             console.debug(photo)
         } catch (error) {
-            
+
         }
-        
+
     }
 
     if (hasPermission === null) {
@@ -227,7 +227,6 @@ const Notes = (props) => {
                     onPress={() => {
 
                         openImagePickerAsync()
-                        // props.navigation.navigate('PickImage')
 
 
 
